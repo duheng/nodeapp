@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <title><%= title %></title>
+	<meta name="description" content="">
+    <meta name="keywords" content="">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+	
+</head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->	
+    <div id="line" style="height:400px"></div>
+	<div id="axis" style="height:400px"></div>
+	<div id="pie" style="height:400px"></div>
+	<script>
+	document.write('<script src=' +
+	('__proto__' in {} ? '/javascripts/libs/zepto' : '/javascripts/libs/jquery') +
+	'.js><\/script>')
+	</script>
+    <!-- ECharts单文件引入 -->
+    <script src="/javascripts/echarts/echarts.js"></script>
+    <script type="text/javascript">
+
+	$(function(){
+	
+			$.ajax({
+				   type: "get",
+				   url: "http://localhost:3000/chart/datacCount/get",
+				   async: true,
+				   cache:false,
+				   success: function(data){
+					//var _data = JSON.parse(data);
+				
+				  var _date = [],pv = [],buy = [],intention = [];
+					  for(var i=0 ;i<=6 ;i++){
+						console.log(data[i] ||0)
+						 var datas = data[i] ||0;
+							_date.push(datas.date || 0 );
+							pv.push(datas.pv || 0 );
+							buy.push(datas.buy || 0 );
+							intention.push(datas.intention || 0 );
+					
+					 
+					  }
+					  isline(pv,buy,intention);
+					  
+				   },
+				   error:function(XMLHttpRequest,textStatus,errorThrown){
+					
+				   }
+			});
+		// 路径配置
+        require.config({
+            paths: {
+                echarts: '/javascripts/echarts'
+            }
+        });
+        
+      
+		// 使用 line axis
+        require(
+            [
+                'echarts',
+				'echarts/chart/line',
+                'echarts/chart/bar' // 使用柱状图就加载bar模块，按需加载
+            ],
+            function (ec) {
+                // 基于准备好的dom，初始化echarts图表
+                var axis = ec.init(document.getElementById('axis')); 
+              
+			var	option = {
+						tooltip : {
+							trigger: 'axis'
+						},
+						legend: {
+							data:['邮件营销','联盟广告','直接访问','搜索引擎']
+						},
+						toolbox: {
+							show : true,
+							feature : {
+								mark : {show: false},
+								dataView : {show: true, readOnly: false},
+								magicType : {show: true, type: ['line', 'bar', 'stack', 'tiled']},
+								restore : {show: true},
+								saveAsImage : {show: true}
+							}
+						},
+						calculable : true,
+						xAxis : [
+							{
+								type : 'category',
+								boundaryGap : false,
+								data : ['周一','周二','周三','周四','周五','周六','周日']
+							}
+						],
+						yAxis : [
+							{
+								type : 'value'
+							}
+						],
+						series : [
+							{
+								name:'邮件营销',
+								type:'line',
+								stack: '总量',
+								symbol: 'none',
+								itemStyle: {
+									normal: {
+										areaStyle: {
+											// 区域图，纵向渐变填充
+											color : (function (){
+												var zrColor = require('zrender/tool/color');
+												return zrColor.getLinearGradient(
+													0, 200, 0, 400,
+													[[0, 'rgba(255,0,0,0.8)'],[0.8, 'rgba(255,255,255,0.1)']]
+												)
+											})()
+										}
+									}
+								},
+								data:[
+									120, 132, 301, 134, 
+									{value:90, symbol:'droplet',symbolSize:5},
+									230, 210
+								]
+							},
+							{
+								name:'联盟广告',
+								type:'line',
+								stack: '总量',
+								smooth: true,
+								symbol: 'image://public/favicon.png',     // 系列级个性化拐点图形
+								symbolSize: 8,
+								data:[
+									120, 82,
+									{
+										value:201,
+										symbol: 'star',  // 数据级个性化拐点图形
+										symbolSize : 15,
+										itemStyle : { normal: {label : {
+											show: true,
+											textStyle : {
+												fontSize : '20',
+												fontFamily : '微软雅黑',
+												fontWeight : 'bold'
+											}
+										}}}
+									},
+									{
+										value:134,
+										symbol: 'none'
+									},
+									190, 
+									{
+										value : 230,
+										symbol: 'emptypin',
+										symbolSize: 8
+									},
+									110
+								]
+							},
+							{
+								name:'直接访问',
+								type:'line',
+								stack: '总量',
+								symbol: 'arrow',
+								symbolSize: 6,
+								symbolRotate: -45,
+								itemStyle: {
+									normal: {
+										color: 'red',
+										lineStyle: {        // 系列级个性化折线样式
+											width: 2,
+											type: 'dashed'
+										}
+									},
+									emphasis: {
+										color: 'blue'
+									}
+								},
+								data:[
+									320, 332, '-', 334,
+									{
+										value: 390,
+										symbol: 'star6',
+										symbolSize : 20,
+										symbolRotate : 10,
+										itemStyle: {        // 数据级个性化折线样式
+											normal: {
+												color: 'yellowgreen'
+											},
+											emphasis: {
+												color: 'orange',
+												label : {
+													show: true,
+													position: 'inside',
+													textStyle : {
+														fontSize : '20'
+													}
+												}
+											}
+										}
+									},
+									330, 320
+								]
+							},
+							{
+								name:'搜索引擎',
+								type:'line',
+								symbol:'emptyCircle',
+								itemStyle: {
+									normal: {
+										lineStyle: {            // 系列级个性化折线样式，横向渐变描边
+											width: 2,
+											color: (function (){
+												var zrColor = require('zrender/tool/color');
+												return zrColor.getLinearGradient(
+													0, 0, 1000, 0,
+													[[0, 'rgba(255,0,0,0.8)'],[0.8, 'rgba(255,255,0,0.8)']]
+												)
+											})(),
+											shadowColor : 'rgba(0,0,0,0.5)',
+											shadowBlur: 10,
+											shadowOffsetX: 8,
+											shadowOffsetY: 8
+										}
+									},
+									emphasis : {
+										label : {show: true}
+									}
+								},
+								data:[
+									620, 732, 791, 
+									{value:734, symbol:'emptyHeart',symbolSize:10},
+									890, 930, 820
+								]
+							}
+						]
+					};
+										
+										
+        
+                // 为echarts对象加载数据 
+                axis.setOption(option); 
+            }
+        );
+		
+		// 使用饼图 pie
+        require(
+            [
+                'echarts',
+                'echarts/chart/pie' // 使用柱状图就加载pie模块，按需加载
+            ],
+            function (ec) {
+                // 基于准备好的dom，初始化echarts图表
+                var pie = ec.init(document.getElementById('pie')); 
+              
+			option = {
+				title : {
+					text: '浏览器占比变化',
+					subtext: '',
+					x:'right',
+					y:'bottom'
+				},
+				tooltip : {
+					trigger: 'item',
+					formatter: "{a} <br/>{b} : {c} ({d}%)"
+				},
+				legend: {
+					orient : 'vertical',
+					x : 'left',
+					data:['Chrome','Firefox','Safari','IE9+','IE8-']
+				},
+				toolbox: {
+					show : true,
+					feature : {
+						mark : {show: true},
+						dataView : {show: true, readOnly: false},
+						restore : {show: true},
+						saveAsImage : {show: true}
+					}
+				},
+				calculable : false,
+				series : (function (){
+					var series = [];
+					for (var i = 0; i < 30; i++) {
+						series.push({
+							name:'浏览器（数据纯属虚构）',
+							type:'pie',
+							itemStyle : {normal : {
+								label : {show : i > 28},
+								labelLine : {show : i > 28, length:20}
+							}},
+							radius : [i * 4 + 40, i * 4 + 43],
+							data:[
+								{value: i * 128 + 80,  name:'Chrome'},
+								{value: i * 64  + 160,  name:'Firefox'},
+								{value: i * 32  + 320,  name:'Safari'},
+								{value: i * 16  + 640,  name:'IE9+'},
+								{value: i * 8  + 1280, name:'IE8-'}
+							]
+						})
+					}
+					series[0].markPoint = {
+						symbol:'emptyCircle',
+						symbolSize:series[0].radius[0],
+						effect:{show:true,scaleSize:12,color:'rgba(250,225,50,0.8)',shadowBlur:10,period:30},
+						data:[{x:'50%',y:'50%'}]
+					};
+					return series;
+				})()
+			};
+			setTimeout(function (){
+				var _ZR = pie.getZrender();
+				var TextShape = require('zrender/shape/Text');
+				// 补充千层饼
+				_ZR.addShape(new TextShape({
+					style : {
+						x : _ZR.getWidth() / 2,
+						y : _ZR.getHeight() / 2,
+						color: '#666',
+						text : '恶梦的过去',
+						textAlign : 'center'
+					}
+				}));
+				_ZR.addShape(new TextShape({
+					style : {
+						x : _ZR.getWidth() / 2 + 200,
+						y : _ZR.getHeight() / 2,
+						brushType:'fill',
+						color: 'orange',
+						text : '美好的未来',
+						textAlign : 'left',
+						textFont:'normal 20px 微软雅黑'
+					}
+				}));
+				_ZR.refresh();
+			}, 2000);
+
+                // 为echarts对象加载数据 
+                pie.setOption(option); 
+            }
+        );
+	
+	});
+        
+		
+		
+		
+		
+		
+	function isline(pv,buy,intention){
+		  // 使用line
+        require(
+            [
+                'echarts',
+				'echarts/chart/line',
+                'echarts/chart/bar' // 使用柱状图就加载bar模块，按需加载
+            ],
+            function (ec) {
+                // 基于准备好的dom，初始化echarts图表
+                var line = ec.init(document.getElementById('line')); 
+              
+			var	option = {
+						title : {
+							text: '集采项目数据统计',
+							subtext: '用于数据分析'
+						},
+						tooltip : {
+							trigger: 'axis'
+						},
+						legend: {
+							data:['访问量','购买量','意向用户']
+						},
+						toolbox: {
+							show : true,
+							feature : {
+								mark : {show: false},
+								dataView : {show: true, readOnly: false},
+								magicType : {show: true, type: ['line', 'bar', 'stack', 'tiled']},
+								restore : {show: true},
+								saveAsImage : {show: true}
+							}
+						},
+						calculable : true,
+						xAxis : [
+							{
+								type : 'category',
+								boundaryGap : false,
+								data : ['周一','周二','周三','周四','周五','周六','周日']
+							}
+						],
+						yAxis : [
+							{
+								type : 'value'
+							}
+						],
+						series : [
+							{
+								name:'访问量',
+								type:'line',
+								smooth:true,
+								itemStyle: {normal: {areaStyle: {type: 'default'}}},
+								data:pv
+							},
+							{
+								name:'购买量',
+								type:'line',
+								smooth:true,
+								itemStyle: {normal: {areaStyle: {type: 'default'}}},
+								data:buy
+							},
+							{
+								name:'意向用户',
+								type:'line',
+								smooth:true,
+								itemStyle: {normal: {areaStyle: {type: 'default'}}},
+								data:intention
+							}
+						]
+					};
+										
+        
+                // 为echarts对象加载数据 
+                line.setOption(option); 
+            }
+        );
+	}	
+		
+		
+		
+		
+    </script>
+</body>

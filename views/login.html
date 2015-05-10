@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <meta charset="UTF-8">
+ 
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+  <title><%= title %></title>
+	<link rel="stylesheet" href="/stylesheets/login/font-awesome.min.css">
+	<link rel='stylesheet prefetch' href='/stylesheets/login/bootstrap.min.css'>
+    <link rel="stylesheet" href="/stylesheets/login/style.css" media="screen" type="text/css" />
+</head>
+
+<body>
+
+  <body class="login-page">
+<div class="login-form">
+
+		<div class="login-content">
+
+			<div class="form-login-error">
+				<h3>Invalid login</h3>
+				<p>Enter <strong>demo</strong>/<strong>demo</strong> as login and password.</p>
+			</div>
+
+			<form method="post" role="form" id="form_login">
+
+				<div class="form-group">
+
+					<div class="input-group">
+						<div class="input-group-addon">
+							<i class="fa fa-user"></i>
+						</div>
+
+						<input type="text" class="form-control" name="username" id="username" placeholder="Username" autocomplete="off" />
+					</div>
+
+				</div>
+
+				<div class="form-group">
+
+					<div class="input-group">
+						<div class="input-group-addon">
+							<i class="fa fa-key"></i>
+						</div>
+
+						<input type="password" class="form-control" name="password" id="password" placeholder="Password" autocomplete="off" />
+					</div>
+
+				</div>
+
+				<div class="form-group">
+					<button type="button" class="btn btn-primary btn-block btn-login js-login-submit">
+						<i class="fa fa-sign-in"></i>
+						Login In
+					</button>
+				</div>
+<!--
+				<div class="form-group">
+					<em>- or -</em>
+				</div>
+
+				<div class="form-group">
+
+					<button type="button" class="btn btn-default btn-lg btn-block facebook-button">
+						&#160;&#160;
+						<i class="fa fa-facebook"></i>
+               |  Login with Facebook
+					</button>
+
+				</div>
+-->
+				
+			</form>
+
+			
+
+		</div>
+
+	</div>
+ </div>
+<script>
+	document.write('<script src=' +
+	('__proto__' in {} ? '/javascripts/libs/zepto' : '/javascripts/libs/jquery') +
+	'.js><\/script>')
+</script>
+<script>
+ var device          =   (/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase()));
+ var clickEvtName    = device ? 'tap' : 'click';
+		
+	;$(function(){
+		$(".js-login-submit").on(clickEvtName,function(){
+			var username = $("#username").val();
+			var password = $("#password").val();
+			if(username == ""){
+				alert("用户名不能为空");
+			}else if(password == ""){
+				alert("密码不能为空");
+			}else{
+				$.ajax({
+					   type: "post",
+					   data:{
+						username:username,
+						password:password
+					   },
+					   url: "http://localhost:3000/login",
+					   async: true,
+					   cache:false,
+					   success: function(data){
+						//var _data = JSON.parse(data);
+						if(data.status == "success"){
+						console.log(data);
+							location.href="chart";
+						}else if(data.status == "error"){
+							alert("登录失败！");
+						}
+						  
+					   },
+					   error:function(XMLHttpRequest,textStatus,errorThrown){
+						
+					   }
+				});
+			
+			
+			}
+		});
+		
+	});
+</script>
+</body>
+
+</html>
